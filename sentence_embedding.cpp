@@ -19,7 +19,7 @@ public:
         return py::array_t<float>(embeddings_.size(), embeddings_.data());
     }
 
-    py::tuple get_most_similar(const std::vector<SentenceEmbedding>& embeddings_list, const std::string& metric) const {
+    py::tuple get_most_similar(const std::vector<SentenceEmbedding>& embeddings_list, const std::string& metric = "cosine") const {
         int most_similar_id = -1;
         float best_score = (metric == "euclidean") ? std::numeric_limits<float>::max() : -std::numeric_limits<float>::max();  // Start with maximum/minimum score based on the metric
 
@@ -30,6 +30,7 @@ public:
             float score = 0.0f;
             if (metric == "euclidean") {
                 // Calculate the Euclidean distance
+                float distance=0.0f;
                 for (size_t j = 0; j < embeddings_.size(); ++j) {
                     float diff = embeddings_[j] - other_embedding[j];
                     distance += diff * diff; 

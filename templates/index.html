@@ -1,0 +1,66 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Essay and Query Interface</title>
+    <script>
+        async function submitForm(event) {
+            event.preventDefault();  // Prevent default form submission
+
+            // Get values from the form
+            const essay = document.getElementById('essay').value;
+            const queries = document.getElementById('queries').value.split('\n');
+
+            // Prepare the data to be sent to the server
+            const data = {
+                essay: essay,
+                queries: queries
+            };
+
+            try {
+                const response = await fetch('/answers', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                // Display the results
+                const answersContainer = document.getElementById('answers');
+                answersContainer.innerHTML = '';  // Clear previous results
+                if (response.ok) {
+                    result.answers.forEach((answer, index) => {
+                        const answerElement = document.createElement('p');
+                        answerElement.textContent = `Answer ${index + 1}: ${answer}`;
+                        answersContainer.appendChild(answerElement);
+                    });
+                } else {
+                    answersContainer.textContent = `Error: ${result.error}`;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Essay and Query Interface</h1>
+    <form id="queryForm" onsubmit="submitForm(event)">
+        <label for="essay">Essay:</label><br>
+        <textarea id="essay" rows="5" cols="60" required></textarea><br><br>
+
+        <label for="queries">Queries (one per line):</label><br>
+        <textarea id="queries" rows="5" cols="60" required></textarea><br><br>
+
+        <input type="submit" value="Submit">
+    </form>
+
+    <h2>Answers:</h2>
+    <div id="answers"></div>
+</body>
+</html>

@@ -2,18 +2,13 @@ import re
 import numpy as np
 import sentence_embedding  # Import C++ class
 from sentence_transformers import SentenceTransformer
+from flask import Flask, request, jsonify, render_template
 
-def input_reading() -> (str, list[str]):
-    # Leitura direta do arquivo durante fases iniciais do programa
-    f = open("essay.txt", "r")
-    essay = f.read()
 
-    queries = []
-    with open("queries.txt", 'r') as file:
-        for line in file:
-            queries.append(line.strip())
+app = Flask(__name__)   
 
-    return essay, queries
+# Initialize the SentenceTransformer model outside of the route
+model = SentenceTransformer("all-mpnet-base-v2")
 
 def text_to_sentence(text: str) -> list[str]:
     # Usa expressão regular para dividir o texto nas pontuações que indicam fim de frase
@@ -32,21 +27,32 @@ def encode(sentence: str, model: SentenceTransformer) -> sentence_embedding.Sent
     
     return sentence_embedding_obj
 
-def main():
-    essay, queries = input_reading()
-    model = SentenceTransformer("all-mpnet-base-v2")
+@app.route('/')
+def index():
+    return render_template('index.html') 
 
-    sentences_list=[]
+@app.route('/answers', methods=['POST'])
+def get_answers():
+    data = request.get_json()
+    essay = data.get('essay')
+    queries = data.get('queries', [])
+
+    if not essay or not queries:
+        return jsonify({"error": "Essay and queries are required."}), 400
+
+    sentences_list = []
     for sentence in text_to_sentence(essay):
         sentence_embedding_obj = encode(sentence, model)
         sentences_list.append(sentence_embedding_obj)
 
+    answers = []
     for query in queries:
         query_obj=encode(query,model)
         most_similar = query_obj.get_most_similar(sentences_list, "cosine")
-        print(query)
-        print(most_similar)
-        print(sentences_list[most_similar[0]].get_sentence())
+        answer = sentences_list[most_similar[0]].get_sentence() if most_similar[0] != -1 else "No similar sentence found."
+        answers.append(answer)
+
+    return jsonify({"answers": answers})
 
 if __name__ == "__main__":
-    main()
+    app.run(debug=True) 
