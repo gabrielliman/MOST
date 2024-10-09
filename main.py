@@ -36,11 +36,17 @@ def main():
     essay, queries = input_reading()
     model = SentenceTransformer("all-mpnet-base-v2")
 
+    sentences_list=[]
     for sentence in text_to_sentence(essay):
-        print(sentence, "\n")
         sentence_embedding_obj = encode(sentence, model)
-        print(sentence_embedding_obj.get_sentence())
-        print(sentence_embedding_obj.get_embeddings())
+        sentences_list.append(sentence_embedding_obj)
+
+    for query in queries:
+        query_obj=encode(query,model)
+        most_similar = query_obj.get_most_similar(sentences_list, "cosine")
+        print(query)
+        print(most_similar)
+        print(sentences_list[most_similar[0]].get_sentence())
 
 if __name__ == "__main__":
     main()
