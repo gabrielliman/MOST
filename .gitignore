@@ -1,5 +1,4 @@
 *.pdf
 .vscode
-Dockerfile
 *.so
 build
