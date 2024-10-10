@@ -13,9 +13,10 @@ Este projeto implementa uma aplicação em Python com funcionalidades em C++, in
 
 ## Requisitos
 
-Python 3.x
-Compilador C++ compatível com Python (usando pybind11)
-Docker (opcional)
+- Testado e executado em ambiente Linux
+- Python 3.x
+- Compilador C++ compatível com Python (usando pybind11)
+- Docker (opcional)
 
 ## Instalação
 
